@@ -30,8 +30,14 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "aepsdk-messaging-android"
+
 include (
          ":testapp",
          ":messaging",
-    ":messagingtestutils"
+    ":messagingtestutils",
+":core"
 )
+project(":core").projectDir =
+    File(settingsDir, "../../aepsdk-core-android/code/core")
+
+

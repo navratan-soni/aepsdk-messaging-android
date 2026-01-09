@@ -82,7 +82,7 @@
             </intent-filter>
         </activity>
 
-        <service
+<!--        <service
             android:name=".NotificationService"
             android:enabled="true"
             android:exported="false">
@@ -91,7 +91,7 @@
             </intent-filter>
         </service>
 
-        <receiver android:name=".NotificationBroadcastReceiver" />
+        <receiver android:name=".NotificationBroadcastReceiver" />-->
 
         <service
             android:name="com.adobe.marketing.mobile.messaging.MessagingService"

@@ -1,36 +1,26 @@
 {
   "project_info": {
-    "project_number": "xxxxxxxxx",
-    "project_id": "xxxxxxxxx",
-    "storage_bucket": "xxxxxxxxx"
+    "project_number": "305729328575",
+    "project_id": "adobe-messaging-app",
+    "storage_bucket": "adobe-messaging-app.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "xxxxxxxxx",
+        "mobilesdk_app_id": "1:305729328575:android:87dd673454b11016b0fd0a",
         "android_client_info": {
           "package_name": "com.adobe.marketing.mobile.messagingsample"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "xxxxxxxxx",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "xxxxxxxxx"
+          "current_key": "AIzaSyDkgZWPmgGSN0NmXEmZclAk7QU4mYFZUsc"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "xxxxxxxxx",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }

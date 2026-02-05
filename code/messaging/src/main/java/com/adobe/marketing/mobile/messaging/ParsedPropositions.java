@@ -83,9 +83,11 @@ public class ParsedPropositions {
                 final PropositionItem firstPropositionItem = proposition.getItems().get(0);
                 switch (firstPropositionItem.getSchema()) {
                     case RULESET:
-                        HashMap<String, Object> rules = new HashMap<>(firstPropositionItem.getItemData());
+                        HashMap<String, Object> rules =
+                                new HashMap<>(firstPropositionItem.getItemData());
                         final JSONObject content = new JSONObject(rules);
-                        final List<LaunchRule> parsedRules = JSONRulesParser.parse(content.toString(), extensionApi);
+                        final List<LaunchRule> parsedRules =
+                                JSONRulesParser.parse(content.toString(), extensionApi);
                         // iam and feed / content card items will be wrapped in a valid rules engine
                         // rule -
                         // code-based experiences are not

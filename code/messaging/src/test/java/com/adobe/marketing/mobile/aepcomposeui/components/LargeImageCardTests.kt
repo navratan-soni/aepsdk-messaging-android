@@ -160,7 +160,9 @@ class LargeImageCardComposableTests(
         `when`(mockServiceProvider.networkService).thenReturn(mockNetworkService)
 
         val context = ApplicationProvider.getApplicationContext<android.content.Context>()
-        val mockBitmap = BitmapFactory.decodeResource(context.resources, android.R.drawable.ic_menu_report_image)
+        val mockBitmap = BitmapFactory.decodeResource(context.resources,
+            android.R.drawable.ic_menu_info_details
+        )
         val simulatedResponse = MessagingTestUtils.simulateNetworkResponse(
             HttpURLConnection.HTTP_OK,
             MessagingTestUtils.bitmapToInputStream(mockBitmap),

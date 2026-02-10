@@ -14,11 +14,11 @@ package com.adobe.marketing.mobile.messaging;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import com.adobe.marketing.mobile.AdobeCallback;
 import com.adobe.marketing.mobile.Event;
 import com.adobe.marketing.mobile.EventSource;
 import com.adobe.marketing.mobile.EventType;
 import com.adobe.marketing.mobile.MobileCore;
-import com.adobe.marketing.mobile.launch.rulesengine.LaunchRulesEngine;
 import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,13 +31,13 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class MessagingRuleEngineInterceptorTests {
 
-    @Mock LaunchRulesEngine.CompletionCallback mockCallback;
+    @Mock AdobeCallback<Boolean> mockCallback;
 
     @Mock Event mockEvent;
 
     @Before
     public void setup() {
-        // Any setup if needed
+        IamRefreshHandler.INSTANCE.reset();
     }
 
     @Test
@@ -95,7 +95,7 @@ public class MessagingRuleEngineInterceptorTests {
             // Simulate completion
             handler.handle.call(true);
             // Assert callback was called
-            verify(mockCallback, times(1)).onComplete();
+            verify(mockCallback, times(1)).call(true);
         }
     }
 

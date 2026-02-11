@@ -24,9 +24,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.adobe.marketing.mobile.Event;
 import com.adobe.marketing.mobile.ExtensionApi;
 import com.adobe.marketing.mobile.Message;
 import com.adobe.marketing.mobile.MessagingEdgeEventType;
+import com.adobe.marketing.mobile.MobileCore;
 import com.adobe.marketing.mobile.services.ServiceProvider;
 import com.adobe.marketing.mobile.services.ui.InAppMessage;
 import com.adobe.marketing.mobile.services.ui.Presentable;
@@ -1363,5 +1365,171 @@ public class PresentableMessageMapperTests {
                     // verify
                     assertNull(message);
                 });
+    }
+
+    // ========================================================================================
+    // recordDisplay tests
+    // ========================================================================================
+    @Test
+    public void test_recordDisplay_dispatchesEventHistoryWriteEvent() {
+        // setup
+        runUsingMockedServiceProvider(
+                () -> {
+                    try (MockedStatic<MobileCore> mobileCoreMockedStatic =
+                            Mockito.mockStatic(MobileCore.class)) {
+                        // Create a PropositionInfo with a valid activityId
+                        Map<String, Object> activityMap = new HashMap<>();
+                        activityMap.put("id", "mockActivityId");
+                        Map<String, Object> scopeDetails = new HashMap<>();
+                        scopeDetails.put("activity", activityMap);
+                        Map<String, Object> propositionInfoMap = new HashMap<>();
+                        propositionInfoMap.put("id", "mockPropositionId");
+                        propositionInfoMap.put("scope", "mockScope");
+                        propositionInfoMap.put("scopeDetails", scopeDetails);
+                        PropositionInfo propositionInfo =
+                                PropositionInfo.create(propositionInfoMap);
+
+                        try {
+                            internalMessage =
+                                    (PresentableMessageMapper.InternalMessage)
+                                            PresentableMessageMapper.getInstance()
+                                                    .createMessage(
+                                                            mockMessagingExtension,
+                                                            createPropositionItem(),
+                                                            new HashMap<>(),
+                                                            propositionInfo);
+                        } catch (Exception exception) {
+                            fail(exception.getMessage());
+                        }
+
+                        // test
+                        internalMessage.recordDisplay();
+
+                        // verify event history write event was dispatched
+                        ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+                        mobileCoreMockedStatic.verify(
+                                () -> MobileCore.dispatchEvent(eventCaptor.capture()));
+                        Event capturedEvent = eventCaptor.getValue();
+                        assertEquals(
+                                MessagingTestConstants.EventName.EVENT_HISTORY_WRITE,
+                                capturedEvent.getName());
+                        assertEquals(
+                                MessagingTestConstants.EventType.MESSAGING, capturedEvent.getType());
+                        assertEquals(
+                                MessagingTestConstants.EventSource.EVENT_HISTORY_WRITE,
+                                capturedEvent.getSource());
+
+                        // verify the event data contains iam history with DISPLAY event type
+                        Map<String, Object> eventData = capturedEvent.getEventData();
+                        assertNotNull(eventData);
+                        @SuppressWarnings("unchecked")
+                        Map<String, String> iamHistory =
+                                (Map<String, String>)
+                                        eventData.get(MessagingTestConstants.EventDataKeys.IAM_HISTORY);
+                        assertNotNull(iamHistory);
+                        assertEquals(
+                                MessagingEdgeEventType.DISPLAY.getPropositionEventType(),
+                                iamHistory.get("eventType"));
+                        assertEquals("mockActivityId", iamHistory.get("id"));
+                    }
+                });
+    }
+
+    @Test
+    public void test_recordDisplay_withNullPropositionInfo_doesNotDispatchEvent() {
+        // setup
+        runUsingMockedServiceProvider(
+                () -> {
+                    try (MockedStatic<MobileCore> mobileCoreMockedStatic =
+                            Mockito.mockStatic(MobileCore.class)) {
+                        try {
+                            internalMessage =
+                                    (PresentableMessageMapper.InternalMessage)
+                                            PresentableMessageMapper.getInstance()
+                                                    .createMessage(
+                                                            mockMessagingExtension,
+                                                            createPropositionItem(),
+                                                            new HashMap<>(),
+                                                            null);
+                        } catch (Exception exception) {
+                            fail(exception.getMessage());
+                        }
+
+                        // test
+                        internalMessage.recordDisplay();
+
+                        // verify no event was dispatched
+                        mobileCoreMockedStatic.verifyNoInteractions();
+                    }
+                });
+    }
+
+    @Test
+    public void test_recordDisplay_withEmptyActivityId_doesNotDispatchEvent() {
+        // setup
+        runUsingMockedServiceProvider(
+                () -> {
+                    try (MockedStatic<MobileCore> mobileCoreMockedStatic =
+                            Mockito.mockStatic(MobileCore.class)) {
+                        // Create a PropositionInfo with an empty activityId (no activity map)
+                        Map<String, Object> scopeDetails = new HashMap<>();
+                        scopeDetails.put("key", "value");
+                        Map<String, Object> propositionInfoMap = new HashMap<>();
+                        propositionInfoMap.put("id", "mockPropositionId");
+                        propositionInfoMap.put("scope", "mockScope");
+                        propositionInfoMap.put("scopeDetails", scopeDetails);
+                        PropositionInfo propositionInfo =
+                                PropositionInfo.create(propositionInfoMap);
+
+                        try {
+                            internalMessage =
+                                    (PresentableMessageMapper.InternalMessage)
+                                            PresentableMessageMapper.getInstance()
+                                                    .createMessage(
+                                                            mockMessagingExtension,
+                                                            createPropositionItem(),
+                                                            new HashMap<>(),
+                                                            propositionInfo);
+                        } catch (Exception exception) {
+                            fail(exception.getMessage());
+                        }
+
+                        // test
+                        internalMessage.recordDisplay();
+
+                        // verify no event was dispatched since activityId is empty
+                        mobileCoreMockedStatic.verifyNoInteractions();
+                    }
+                });
+    }
+
+    @Test
+    public void test_recordDisplay_DefaultInterfaceImplementation_doesNotThrow() {
+        // test - verify default interface implementation does not throw
+        Message message =
+                new Message() {
+                    @Override
+                    public void track(String interaction, MessagingEdgeEventType eventType) {}
+
+                    @Override
+                    public void show() {}
+
+                    @Override
+                    public void dismiss() {}
+
+                    @Override
+                    public String getId() {
+                        return "testId";
+                    }
+
+                    @Override
+                    public void setAutoTrack(boolean enabled) {}
+                };
+
+        // test - calling recordDisplay should not throw
+        message.recordDisplay();
+
+        // verify - no exception thrown, method completes successfully
+        // The default implementation just logs a trace message
     }
 }

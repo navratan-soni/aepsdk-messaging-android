@@ -12,6 +12,9 @@
 package com.adobe.marketing.mobile;
 
 import androidx.annotation.NonNull;
+
+import com.adobe.marketing.mobile.services.Log;
+
 import java.util.Collections;
 import java.util.Map;
 
@@ -24,6 +27,16 @@ public interface Message {
      *     the ensuing Edge Event
      */
     void track(final String interaction, final MessagingEdgeEventType eventType);
+
+    /**
+     * Records a display event in the device's event history database.
+     * 
+     * Should only be used in conjunction with a {@code PresentationDelegate} to enforce show frequency
+     * rules even if the {@code Message} was suppressed.
+     */
+    default void recordDisplay() {
+        Log.trace("Messaging", "Messaging", "recordDisplay protocol method was not implemented.");
+    }
 
     /** Shows this {@link Message}. */
     void show();

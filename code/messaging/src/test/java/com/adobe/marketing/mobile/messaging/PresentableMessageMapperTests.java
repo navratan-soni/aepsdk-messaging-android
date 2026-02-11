@@ -1414,7 +1414,8 @@ public class PresentableMessageMapperTests {
                                 MessagingTestConstants.EventName.EVENT_HISTORY_WRITE,
                                 capturedEvent.getName());
                         assertEquals(
-                                MessagingTestConstants.EventType.MESSAGING, capturedEvent.getType());
+                                MessagingTestConstants.EventType.MESSAGING,
+                                capturedEvent.getType());
                         assertEquals(
                                 MessagingTestConstants.EventSource.EVENT_HISTORY_WRITE,
                                 capturedEvent.getSource());
@@ -1425,7 +1426,8 @@ public class PresentableMessageMapperTests {
                         @SuppressWarnings("unchecked")
                         Map<String, String> iamHistory =
                                 (Map<String, String>)
-                                        eventData.get(MessagingTestConstants.EventDataKeys.IAM_HISTORY);
+                                        eventData.get(
+                                                MessagingTestConstants.EventDataKeys.IAM_HISTORY);
                         assertNotNull(iamHistory);
                         assertEquals(
                                 MessagingEdgeEventType.DISPLAY.getPropositionEventType(),

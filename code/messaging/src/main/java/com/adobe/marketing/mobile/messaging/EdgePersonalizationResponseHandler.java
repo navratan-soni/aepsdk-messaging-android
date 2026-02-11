@@ -292,8 +292,9 @@ class EdgePersonalizationResponseHandler {
                         // queue
                         String eventId = newEvent.getUniqueIdentifier();
                         requestedSurfacesForEventId.remove(eventId);
-                        CompletionHandler completionHandler = parent.completionHandlerForEdgeRequestEventId(eventId);
-                        if(completionHandler != null) {
+                        CompletionHandler completionHandler =
+                                parent.completionHandlerForEdgeRequestEventId(eventId);
+                        if (completionHandler != null) {
                             completionHandler.handle.call(false);
                         }
                         serialWorkDispatcher.resume();

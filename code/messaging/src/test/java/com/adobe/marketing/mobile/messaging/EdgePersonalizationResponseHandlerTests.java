@@ -387,7 +387,8 @@ public class EdgePersonalizationResponseHandlerTests {
                 () -> {
                     // setup
                     String edgeRequestEventId = "mockEventId";
-                    when(mockMessagingExtension.completionHandlerForEdgeRequestEventId(eq(edgeRequestEventId)))
+                    when(mockMessagingExtension.completionHandlerForEdgeRequestEventId(
+                                    eq(edgeRequestEventId)))
                             .thenReturn(completionHandler);
 
                     // test

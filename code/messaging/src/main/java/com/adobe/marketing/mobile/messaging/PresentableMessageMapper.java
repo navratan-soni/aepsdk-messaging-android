@@ -310,10 +310,7 @@ class PresentableMessageMapper {
 
         @Override
         public void recordDisplay() {
-            Log.trace(
-                    MessagingConstants.LOG_TAG,
-                    SELF_TAG,
-                    "recordDisplay protocol method was not implemented.");
+            Log.trace(MessagingConstants.LOG_TAG, SELF_TAG, "recording message display in history");
 
             recordEventHistory(null, MessagingEdgeEventType.DISPLAY);
         }

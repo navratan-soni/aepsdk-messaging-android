@@ -17,11 +17,10 @@ import com.adobe.marketing.mobile.launch.rulesengine.LaunchRule
 import com.adobe.marketing.mobile.launch.rulesengine.RuleReevaluationInterceptor
 
 class MessagingRuleEngineInterceptor : RuleReevaluationInterceptor {
-
     override fun onReevaluationTriggered(
-        event: Event?,
-        revaluableRules: List<LaunchRule?>?,
-        callback: AdobeCallback<Boolean>?
+        event: Event,
+        revaluableRules: List<LaunchRule?>,
+        callback: AdobeCallback<Boolean>
     ) {
         IamRefreshHandler.refreshInAppMessages(callback)
     }

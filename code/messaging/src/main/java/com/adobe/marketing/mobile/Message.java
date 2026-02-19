@@ -33,7 +33,7 @@ public interface Message {
      * frequency rules even if the {@code Message} was suppressed.
      */
     default void recordDisplay() {
-        Log.trace("Messaging", "Messaging", "recordDisplay protocol method was not implemented.");
+        Log.trace("Messaging", "Message", "recordDisplay protocol method was not implemented.");
     }
 
     /** Shows this {@link Message}. */

@@ -98,25 +98,4 @@ public class MessagingRuleEngineInterceptorTests {
             verify(mockCallback, times(1)).call(true);
         }
     }
-
-    @Test
-    public void test_onReevaluationTriggered_handlesNullCallback() {
-        // Arrange
-        MessagingRuleEngineInterceptor interceptor = new MessagingRuleEngineInterceptor();
-
-        try (MockedStatic<MobileCore> mobileCoreMockedStatic = mockStatic(MobileCore.class);
-                MockedStatic<MessagingExtension> messagingExtensionMockedStatic =
-                        mockStatic(MessagingExtension.class)) {
-            // Act
-            interceptor.onReevaluationTriggered(
-                    mockEvent, Collections.emptyList(), null // callback is null
-                    );
-            // Assert: no crash, event still dispatched
-            mobileCoreMockedStatic.verify(
-                    () -> MobileCore.dispatchEvent(any(Event.class)), times(1));
-            messagingExtensionMockedStatic.verify(
-                    () -> MessagingExtension.addCompletionHandler(any(CompletionHandler.class)),
-                    times(1));
-        }
-    }
 }

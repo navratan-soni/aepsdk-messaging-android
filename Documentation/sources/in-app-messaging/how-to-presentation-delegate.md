@@ -171,6 +171,55 @@ public boolean canShow(Presentable<?> presentable) {
 }
 ```
 
+### Recording display events for suppressed messages
+
+When a message is suppressed via the `canShow` method, it may still be necessary to record the display event in the device's event history. This is important for enforcing show frequency rules based on display count, even when the message is not actually shown.
+
+Use the `recordDisplay()` method on the `Message` object to record the display event without showing the message:
+
+#### Kotlin
+```kotlin
+override fun canShow(presentable: Presentable<*>): Boolean {
+    if (!presentable.getPresentation() is InAppMessage) return true
+
+    currentMessagePresentable = presentable as Presentable<InAppMessage>
+    val message = MessagingUtils.getMessageForPresentable(currentMessagePresentable)
+
+    if (!showMessages) {
+        // Record the display event even though the message is suppressed
+        // This ensures frequency capping rules are still enforced
+        message?.recordDisplay()
+        return false
+    }
+
+    return true
+}
+```
+
+#### Java
+```java
+@Override
+public boolean canShow(Presentable<?> presentable) {
+    if (!(presentable.getPresentation() instanceof InAppMessage)) {
+        return true;
+    }
+
+    currentMessagePresentable = (Presentable<InAppMessage>) presentable;
+    Message message = MessagingUtils.getMessageForPresentable(currentMessagePresentable);
+
+    if (!showMessages) {
+        // Record the display event even though the message is suppressed
+        // This ensures frequency capping rules are still enforced
+        if (message != null) {
+            message.recordDisplay();
+        }
+        return false;
+    }
+
+    return true;
+}
+```
+
 Another option is to store a reference to the `Message` object, and call the `show()` method on it at a later time.
 
 Continuing with the above example, after you have stored the message that was triggered initially, you can choose to show it upon completion of the other workflow:

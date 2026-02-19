@@ -33,6 +33,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.adobe.marketing.mobile.*
+import com.adobe.marketing.mobile.messaging.MessagingUtils
 import com.adobe.marketing.mobile.messaging.NotificationInteractionReceiver
 import com.adobe.marketing.mobile.messagingsample.databinding.ActivityMainBinding
 import com.adobe.marketing.mobile.services.ServiceProvider
@@ -523,6 +524,8 @@ class CustomDelegate : PresentationDelegate {
 
         if(!showMessages) {
             println("message was suppressed: ${presentable.getPresentation().id}")
+            val message = MessagingUtils.getMessageForPresentable(currentMessagePresentable);
+            message?.recordDisplay()
 //            val message = MessagingUtils.getMessageForPresentable(currentMessagePresentable)
 //            message?.track("message suppressed", MessagingEdgeEventType.TRIGGER)
         }

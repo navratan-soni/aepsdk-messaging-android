@@ -11,10 +11,7 @@
 
 package com.adobe.marketing.mobile;
 
-import static com.adobe.marketing.mobile.messaging.MessagingConstants.LOG_TAG;
-
 import androidx.annotation.NonNull;
-import com.adobe.marketing.mobile.services.Log;
 import java.util.Collections;
 import java.util.Map;
 
@@ -34,9 +31,7 @@ public interface Message {
      * <p>Should only be used in conjunction with a {@code PresentationDelegate} to enforce show
      * frequency rules even if the {@code Message} was suppressed.
      */
-    default void recordDisplay() {
-        Log.trace(LOG_TAG, LOG_TAG, "recordDisplay protocol method was not implemented.");
-    }
+    default void recordDisplay() {}
 
     /** Shows this {@link Message}. */
     void show();

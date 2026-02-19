@@ -65,6 +65,28 @@ Returns the message's id.
 String getId()
 ```
 
+### getMetadata
+
+Gets the `Message's` custom metadata which is the metadata present in the `InAppSchemaData` created from the `Message` payload.
+
+```java
+@NonNull default Map<String, Object> getMetadata()
+```
+
+###### Returns
+
+* A `Map<String, Object>` containing the custom metadata present in the `Message` payload. Returns an empty map if no metadata is present.
+
+### recordDisplay
+
+Records a display event in the device's event history database.
+
+This method should only be used in conjunction with a `PresentationDelegate` to enforce show frequency rules even if the `Message` was suppressed.
+
+```java
+default void recordDisplay()
+```
+
 Below is the table of values returned by calling the `toString` method for each case, which are used as the XDM `eventType` in outgoing experience events:
 
 | Case                      | String value                      |

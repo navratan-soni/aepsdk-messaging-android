@@ -308,6 +308,13 @@ class PresentableMessageMapper {
             messagingExtension.sendPropositionInteraction(propositionInteractionXdm);
         }
 
+        @Override
+        public void recordDisplay() {
+            Log.trace(MessagingConstants.LOG_TAG, SELF_TAG, "recording message display in history");
+
+            recordEventHistory(null, MessagingEdgeEventType.DISPLAY);
+        }
+
         // ui management
         @Override
         public void show() {

@@ -424,7 +424,7 @@ class EdgePersonalizationResponseHandler {
                         updatedPropositions.remove(proposition);
                         // remove the content card schema data from the ContentCardMapper as well
                         ContentCardMapper.getInstance()
-                                .removeContentCardSchemaData(proposition.getUniqueId());
+                                .removeContentCardSchemaData(proposition.getActivityId());
                     }
                 }
                 contentCardsBySurface.put(surface, updatedPropositions);
@@ -1001,7 +1001,7 @@ class EdgePersonalizationResponseHandler {
         for (final Surface surface : surfaces) {
             final List<Proposition> propositionsList = inMemoryPropositions.get(surface);
             if (!MessagingUtils.isNullOrEmpty(propositionsList)) {
-                propositionMap.put(surface, propositionsList);
+                propositionMap.put(surface, new ArrayList<>(propositionsList));
             }
         }
         return propositionMap;

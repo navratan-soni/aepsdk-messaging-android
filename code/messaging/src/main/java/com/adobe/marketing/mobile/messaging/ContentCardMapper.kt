@@ -62,6 +62,7 @@ class ContentCardMapper private constructor() {
         contentCardSchemaDataMap.remove(propositionId)
     }
 
+    @JvmName("clear")
     @VisibleForTesting
     internal fun clear() {
         contentCardSchemaDataMap.clear()

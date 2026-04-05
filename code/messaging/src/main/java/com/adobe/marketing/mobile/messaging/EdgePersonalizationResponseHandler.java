@@ -304,9 +304,6 @@ class EdgePersonalizationResponseHandler {
                                 "Unable to run completion logic for a personalization request event"
                                         + " - error occurred: %s",
                                 adobeError.getErrorName());
-                        if (handler != null) {
-                            handler.handle.call(false);
-                        }
                     }
 
                     // the callback is called by Edge extension when a request's stream has been
@@ -892,7 +889,14 @@ class EdgePersonalizationResponseHandler {
         // This ensures cards removed server-side are also evicted from the local cache.
         for (final Surface surface : requestedSurfaces) {
             if (!qualifiedContentCardsBySurface.containsKey(surface)) {
-                contentCardsBySurface.remove(surface);
+                final List<Proposition> evictedPropositions =
+                        contentCardsBySurface.remove(surface);
+                if (evictedPropositions != null) {
+                    for (final Proposition proposition : evictedPropositions) {
+                        ContentCardMapper.getInstance()
+                                .removeContentCardSchemaData(proposition.getUniqueId());
+                    }
+                }
             }
         }
 
@@ -930,6 +934,13 @@ class EdgePersonalizationResponseHandler {
                         .storeContentCardSchemaData(propositionAsContentCard);
             }
 
+            // Remove ContentCardMapper entries for old propositions no longer in the fresh response
+            for (final Proposition oldProposition : existingPropositionsArray) {
+                if (!newPropositionsArray.contains(oldProposition)) {
+                    ContentCardMapper.getInstance()
+                            .removeContentCardSchemaData(oldProposition.getUniqueId());
+                }
+            }
             // Replace the cached list entirely with the fresh response data
             contentCardsBySurface.put(surface, newPropositionsArray);
 
@@ -939,7 +950,7 @@ class EdgePersonalizationResponseHandler {
                         newPropositionItems, null, MessagingEdgeEventType.TRIGGER);
             }
 
-            int newCount = existingPropositionsArray.size();
+            int newCount = newPropositionsArray.size();
             if (startingCount != newCount) {
                 final Locale locale =
                         ServiceProvider.getInstance().getDeviceInfoService().getActiveLocale();

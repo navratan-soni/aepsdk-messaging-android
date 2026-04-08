@@ -153,16 +153,18 @@ public class EdgePersonalizationResponseHandlerTests {
 
     /**
      * Pre-populates ContentCardMapper with a mock ContentCardSchemaData entry keyed by the given
-     * proposition ID, so tests can verify removal behaviour.
+     * activity ID, so tests can verify removal behaviour. Uses a separate unique ID to ensure the
+     * mapper is keyed by activityId, not uniqueId.
      */
-    private void seedContentCardMapper(String propositionId) {
+    private void seedContentCardMapper(String activityId) {
         ContentCardSchemaData schemaData = mock(ContentCardSchemaData.class);
         PropositionItem propItem = mock(PropositionItem.class);
         Proposition prop = mock(Proposition.class);
         schemaData.parent = propItem;
         propItem.propositionReference = new SoftReference<>(prop);
         when(propItem.getProposition()).thenReturn(prop);
-        when(prop.getUniqueId()).thenReturn(propositionId);
+        when(prop.getUniqueId()).thenReturn("uniqueId_" + activityId);
+        when(prop.getActivityId()).thenReturn(activityId);
         ContentCardMapper.getInstance().storeContentCardSchemaData(schemaData);
     }
 
@@ -3101,18 +3103,18 @@ public class EdgePersonalizationResponseHandlerTests {
                     config.count = 1;
                     List<Proposition> propositionsA =
                             MessagingTestUtils.generateQualifiedContentCards(config);
-                    String propositionId = propositionsA.get(0).getUniqueId();
+                    String activityId = propositionsA.get(0).getActivityId();
 
                     Map<Surface, List<Proposition>> contentCards = new HashMap<>();
                     contentCards.put(surfaceA, propositionsA);
                     edgePersonalizationResponseHandler.setQualifiedContentCardsBySurface(
                             contentCards);
 
-                    // pre-populate ContentCardMapper with an entry for the proposition
-                    seedContentCardMapper(propositionId);
+                    // pre-populate ContentCardMapper with an entry keyed by activityId
+                    seedContentCardMapper(activityId);
                     assertNotNull(
                             ContentCardMapper.getInstance()
-                                    .getContentCardSchemaData(propositionId));
+                                    .getContentCardSchemaData(activityId));
 
                     when(mockContentCardRulesEngine.evaluate(any(Event.class))).thenReturn(null);
 
@@ -3132,7 +3134,7 @@ public class EdgePersonalizationResponseHandlerTests {
                     // verify ContentCardMapper entry was removed
                     assertNull(
                             ContentCardMapper.getInstance()
-                                    .getContentCardSchemaData(propositionId));
+                                    .getContentCardSchemaData(activityId));
                 });
     }
 
@@ -3147,25 +3149,26 @@ public class EdgePersonalizationResponseHandlerTests {
                     configOld.count = 1;
                     List<Proposition> oldPropositions =
                             MessagingTestUtils.generateQualifiedContentCards(configOld);
-                    String oldPropositionId = oldPropositions.get(0).getUniqueId();
+                    String oldActivityId = oldPropositions.get(0).getActivityId();
 
                     Map<Surface, List<Proposition>> contentCards = new HashMap<>();
                     contentCards.put(surfaceA, oldPropositions);
                     edgePersonalizationResponseHandler.setQualifiedContentCardsBySurface(
                             contentCards);
 
-                    // pre-populate ContentCardMapper with an entry for the old proposition
-                    seedContentCardMapper(oldPropositionId);
+                    // pre-populate ContentCardMapper with an entry keyed by activityId
+                    seedContentCardMapper(oldActivityId);
                     assertNotNull(
                             ContentCardMapper.getInstance()
-                                    .getContentCardSchemaData(oldPropositionId));
+                                    .getContentCardSchemaData(oldActivityId));
 
                     // set up propositionInfo so getPropositionsFromContentCardRulesEngine can
                     // reconstruct propositions from evaluate() results
                     String newPropositionId = "newPropositionId";
+                    String newActivityId = "newActivityId";
                     try {
                         Map<String, Object> activity = new HashMap<>();
-                        activity.put("id", "newActivityId");
+                        activity.put("id", newActivityId);
                         Map<String, Object> scopeDetails = new HashMap<>();
                         scopeDetails.put("activity", activity);
                         scopeDetails.put("correlationID", "testCorrelationId");
@@ -3209,11 +3212,11 @@ public class EdgePersonalizationResponseHandlerTests {
                     // verify old proposition's ContentCardMapper entry was removed
                     assertNull(
                             ContentCardMapper.getInstance()
-                                    .getContentCardSchemaData(oldPropositionId));
-                    // verify new proposition is stored in ContentCardMapper
+                                    .getContentCardSchemaData(oldActivityId));
+                    // verify new proposition is stored in ContentCardMapper (keyed by activityId)
                     assertNotNull(
                             ContentCardMapper.getInstance()
-                                    .getContentCardSchemaData(newPropositionId));
+                                    .getContentCardSchemaData(newActivityId));
                 });
     }
 

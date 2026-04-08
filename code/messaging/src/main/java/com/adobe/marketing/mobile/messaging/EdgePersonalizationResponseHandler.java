@@ -822,41 +822,12 @@ class EdgePersonalizationResponseHandler {
                     }
                 }
                 existingPropositionsArray.add(proposition);
-
-                // Store qualified content cards as schema data in the ContentCardMapper for later
-                // use by the UI layer
-                final ContentCardSchemaData propositionAsContentCard =
-                        proposition.getItems().get(0).getContentCardSchemaData();
-                ContentCardMapper.getInstance()
-                        .storeContentCardSchemaData(propositionAsContentCard);
+                storeContentCardInMapper(proposition);
             }
 
             contentCardsBySurface.put(surface, existingPropositionsArray);
-
-            // Send batched trigger events for new proposition items only
-            if (!newPropositionItems.isEmpty()) {
-                sendBatchedPropositionInteraction(
-                        newPropositionItems, null, MessagingEdgeEventType.TRIGGER);
-            }
-
-            int newCount = existingPropositionsArray.size();
-            if (startingCount != newCount) {
-                final Locale locale =
-                        ServiceProvider.getInstance().getDeviceInfoService().getActiveLocale();
-                String message =
-                        newCount > 0
-                                ? String.format(
-                                        locale,
-                                        "User has qualified for %d content card(s) for surface %s",
-                                        newCount,
-                                        surface.getUri())
-                                : String.format(
-                                        locale,
-                                        "User has not qualified for any content card(s) for surface"
-                                                + " %s",
-                                        surface.getUri());
-                Log.trace(MessagingConstants.LOG_TAG, SELF_TAG, message);
-            }
+            sendTriggersForNewPropositions(newPropositionItems);
+            logContentCardCountChange(surface, startingCount, existingPropositionsArray.size());
         }
     }
 
@@ -894,7 +865,7 @@ class EdgePersonalizationResponseHandler {
                 if (evictedPropositions != null) {
                     for (final Proposition proposition : evictedPropositions) {
                         ContentCardMapper.getInstance()
-                                .removeContentCardSchemaData(proposition.getUniqueId());
+                                .removeContentCardSchemaData(proposition.getActivityId());
                     }
                 }
             }
@@ -925,49 +896,74 @@ class EdgePersonalizationResponseHandler {
                     }
                 }
                 newPropositionsArray.add(proposition);
-
-                // Store qualified content cards as schema data in the ContentCardMapper for later
-                // use by the UI layer
-                final ContentCardSchemaData propositionAsContentCard =
-                        proposition.getItems().get(0).getContentCardSchemaData();
-                ContentCardMapper.getInstance()
-                        .storeContentCardSchemaData(propositionAsContentCard);
+                storeContentCardInMapper(proposition);
             }
 
             // Remove ContentCardMapper entries for old propositions no longer in the fresh response
             for (final Proposition oldProposition : existingPropositionsArray) {
                 if (!newPropositionsArray.contains(oldProposition)) {
                     ContentCardMapper.getInstance()
-                            .removeContentCardSchemaData(oldProposition.getUniqueId());
+                            .removeContentCardSchemaData(oldProposition.getActivityId());
                 }
             }
-            // Replace the cached list entirely with the fresh response data
+
             contentCardsBySurface.put(surface, newPropositionsArray);
+            sendTriggersForNewPropositions(newPropositionItems);
+            logContentCardCountChange(surface, startingCount, newPropositionsArray.size());
+        }
+    }
 
-            // Send batched trigger events for new proposition items only
-            if (!newPropositionItems.isEmpty()) {
-                sendBatchedPropositionInteraction(
-                        newPropositionItems, null, MessagingEdgeEventType.TRIGGER);
-            }
+    /**
+     * Stores the first {@link PropositionItem}'s {@link ContentCardSchemaData} in the {@link
+     * ContentCardMapper} for later use by the UI layer. No-op if the proposition has no items.
+     *
+     * @param proposition the {@link Proposition} whose first item should be stored.
+     */
+    private void storeContentCardInMapper(final Proposition proposition) {
+        final List<PropositionItem> items = proposition.getItems();
+        if (!items.isEmpty()) {
+            final ContentCardSchemaData schemaData = items.get(0).getContentCardSchemaData();
+            ContentCardMapper.getInstance().storeContentCardSchemaData(schemaData);
+        }
+    }
 
-            int newCount = newPropositionsArray.size();
-            if (startingCount != newCount) {
-                final Locale locale =
-                        ServiceProvider.getInstance().getDeviceInfoService().getActiveLocale();
-                String message =
-                        newCount > 0
-                                ? String.format(
-                                        locale,
-                                        "User has qualified for %d content card(s) for surface %s",
-                                        newCount,
-                                        surface.getUri())
-                                : String.format(
-                                        locale,
-                                        "User has not qualified for any content card(s) for surface"
-                                                + " %s",
-                                        surface.getUri());
-                Log.trace(MessagingConstants.LOG_TAG, SELF_TAG, message);
-            }
+    /**
+     * Sends batched {@code TRIGGER} events for the given proposition items. No-op if the list is
+     * empty.
+     *
+     * @param newPropositionItems {@link List} of newly qualified {@link PropositionItem}s.
+     */
+    private void sendTriggersForNewPropositions(final List<PropositionItem> newPropositionItems) {
+        if (!newPropositionItems.isEmpty()) {
+            sendBatchedPropositionInteraction(
+                    newPropositionItems, null, MessagingEdgeEventType.TRIGGER);
+        }
+    }
+
+    /**
+     * Logs a trace message when the number of qualified content cards for a surface changes.
+     *
+     * @param surface the {@link Surface} whose count changed.
+     * @param oldCount the previous number of qualified propositions.
+     * @param newCount the current number of qualified propositions.
+     */
+    private void logContentCardCountChange(
+            final Surface surface, final int oldCount, final int newCount) {
+        if (oldCount != newCount) {
+            final Locale locale =
+                    ServiceProvider.getInstance().getDeviceInfoService().getActiveLocale();
+            String message =
+                    newCount > 0
+                            ? String.format(
+                                    locale,
+                                    "User has qualified for %d content card(s) for surface %s",
+                                    newCount,
+                                    surface.getUri())
+                            : String.format(
+                                    locale,
+                                    "User has not qualified for any content card(s) for surface %s",
+                                    surface.getUri());
+            Log.trace(MessagingConstants.LOG_TAG, SELF_TAG, message);
         }
     }
 

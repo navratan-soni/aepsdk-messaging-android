@@ -2851,8 +2851,7 @@ public class EdgePersonalizationResponseHandlerTests {
     // removeOrReplaceContentCards
     // ========================================================================================
     @Test
-    public void
-            test_removeOrReplaceContentCards_EvictsAllRequestedSurfaces_WhenNoQualifiedCards() {
+    public void test_removeOrReplaceContentCards_EvictsAllRequestedSurfaces_WhenNoQualifiedCards() {
         runUsingMockedServiceProvider(
                 () -> {
                     // setup: pre-populate contentCardsBySurface with two surfaces
@@ -3003,8 +3002,7 @@ public class EdgePersonalizationResponseHandlerTests {
                                 (Map<String, PropositionInfo>)
                                         propositionInfoField.get(
                                                 edgePersonalizationResponseHandler);
-                        propositionInfoMap.put(
-                                "183639c4-cb37-458e-a8ef-4e130d767ebf", info);
+                        propositionInfoMap.put("183639c4-cb37-458e-a8ef-4e130d767ebf", info);
                     } catch (Exception e) {
                         fail("Failed to set propositionInfo via reflection: " + e.getMessage());
                     }
@@ -3012,8 +3010,7 @@ public class EdgePersonalizationResponseHandlerTests {
                     // mock evaluate to return 1 qualified item for surfaceA only
                     Map<Surface, List<PropositionItem>> evaluateResult = new HashMap<>();
                     evaluateResult.put(
-                            surfaceA,
-                            MessagingTestUtils.createMessagingPropositionItemList(1));
+                            surfaceA, MessagingTestUtils.createMessagingPropositionItemList(1));
                     when(mockContentCardRulesEngine.evaluate(any(Event.class)))
                             .thenReturn(evaluateResult);
 
@@ -3113,8 +3110,7 @@ public class EdgePersonalizationResponseHandlerTests {
                     // pre-populate ContentCardMapper with an entry keyed by activityId
                     seedContentCardMapper(activityId);
                     assertNotNull(
-                            ContentCardMapper.getInstance()
-                                    .getContentCardSchemaData(activityId));
+                            ContentCardMapper.getInstance().getContentCardSchemaData(activityId));
 
                     when(mockContentCardRulesEngine.evaluate(any(Event.class))).thenReturn(null);
 
@@ -3133,8 +3129,7 @@ public class EdgePersonalizationResponseHandlerTests {
                                     .get(surfaceA));
                     // verify ContentCardMapper entry was removed
                     assertNull(
-                            ContentCardMapper.getInstance()
-                                    .getContentCardSchemaData(activityId));
+                            ContentCardMapper.getInstance().getContentCardSchemaData(activityId));
                 });
     }
 
@@ -3188,16 +3183,14 @@ public class EdgePersonalizationResponseHandlerTests {
                                 (Map<String, PropositionInfo>)
                                         propositionInfoField.get(
                                                 edgePersonalizationResponseHandler);
-                        propositionInfoMap.put(
-                                "183639c4-cb37-458e-a8ef-4e130d767ebf", info);
+                        propositionInfoMap.put("183639c4-cb37-458e-a8ef-4e130d767ebf", info);
                     } catch (Exception e) {
                         fail("Failed to set propositionInfo via reflection: " + e.getMessage());
                     }
 
                     Map<Surface, List<PropositionItem>> evaluateResult = new HashMap<>();
                     evaluateResult.put(
-                            surfaceA,
-                            MessagingTestUtils.createMessagingPropositionItemList(1));
+                            surfaceA, MessagingTestUtils.createMessagingPropositionItemList(1));
                     when(mockContentCardRulesEngine.evaluate(any(Event.class)))
                             .thenReturn(evaluateResult);
 
@@ -3224,8 +3217,7 @@ public class EdgePersonalizationResponseHandlerTests {
     // removeOrReplaceContentCards — edge cases
     // ========================================================================================
     @Test
-    public void
-            test_removeOrReplaceContentCards_NoOp_WhenRequestedSurfacesEmpty() {
+    public void test_removeOrReplaceContentCards_NoOp_WhenRequestedSurfacesEmpty() {
         runUsingMockedServiceProvider(
                 () -> {
                     Surface surfaceA = new Surface("feed1");
@@ -3258,8 +3250,7 @@ public class EdgePersonalizationResponseHandlerTests {
     }
 
     @Test
-    public void
-            test_removeOrReplaceContentCards_NoError_WhenRequestedSurfaceNeverCached() {
+    public void test_removeOrReplaceContentCards_NoError_WhenRequestedSurfaceNeverCached() {
         runUsingMockedServiceProvider(
                 () -> {
                     Surface surfaceA = new Surface("feed1");

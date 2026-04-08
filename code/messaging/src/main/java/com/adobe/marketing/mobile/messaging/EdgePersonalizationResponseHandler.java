@@ -860,8 +860,7 @@ class EdgePersonalizationResponseHandler {
         // This ensures cards removed server-side are also evicted from the local cache.
         for (final Surface surface : requestedSurfaces) {
             if (!qualifiedContentCardsBySurface.containsKey(surface)) {
-                final List<Proposition> evictedPropositions =
-                        contentCardsBySurface.remove(surface);
+                final List<Proposition> evictedPropositions = contentCardsBySurface.remove(surface);
                 if (evictedPropositions != null) {
                     for (final Proposition proposition : evictedPropositions) {
                         ContentCardMapper.getInstance()

@@ -982,7 +982,7 @@ public class MessagingPublicAPITests {
                 });
 
         // verify qualified content card is returned
-        assertTrue(latch.await(1000, TimeUnit.SECONDS));
+        assertTrue(latch.await(5, TimeUnit.SECONDS));
         assertEquals(2, qualifiedCardPropositions.size());
         List<Proposition> contentCardList1 = qualifiedCardPropositions.get(surface1);
         assertNotNull(contentCardList1);
@@ -1034,7 +1034,7 @@ public class MessagingPublicAPITests {
                 });
 
         // verify empty qualified content card list is returned
-        assertTrue(latch1.await(1000, TimeUnit.SECONDS));
+        assertTrue(latch1.await(5, TimeUnit.SECONDS));
         assertEquals(1, qualifiedCardPropositions1.size());
         List<Proposition> contentCardList3 = qualifiedCardPropositions1.get(surface1);
         assertNotNull(contentCardList3);

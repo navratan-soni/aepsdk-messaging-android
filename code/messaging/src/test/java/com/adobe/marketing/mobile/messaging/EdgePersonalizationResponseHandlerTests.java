@@ -1404,10 +1404,11 @@ public class EdgePersonalizationResponseHandlerTests {
                         assertEquals(3, rulesListCaptor.getAllValues().get(0).size());
                         assertEquals(15, rulesListCaptor.getAllValues().get(1).size());
 
-                        // verify parsed rules replaced in feed rules engine for both responses
-                        verify(mockContentCardRulesEngine, times(1))
+                        // verify content card rules engine synced for both responses
+                        verify(mockContentCardRulesEngine, times(2))
                                 .replaceRules(contentCardRulesListCaptor.capture());
-                        assertEquals(4, contentCardRulesListCaptor.getAllValues().get(0).size());
+                        assertEquals(0, contentCardRulesListCaptor.getAllValues().get(0).size());
+                        assertEquals(4, contentCardRulesListCaptor.getAllValues().get(1).size());
                         List<LaunchRule> eventHistoryRules = new ArrayList<>();
                         List<LaunchRule> inAppRules = new ArrayList<>();
                         for (LaunchRule launchRule : rulesListCaptor.getAllValues().get(1)) {
@@ -1494,11 +1495,14 @@ public class EdgePersonalizationResponseHandlerTests {
                         // test
                         edgePersonalizationResponseHandler.handleProcessCompletedEvent(mockEvent);
 
-                        // verify in-app rules engine not called
-                        verifyNoInteractions(mockMessagingRulesEngine);
-
-                        // verify feed rules engine not called
-                        verifyNoInteractions(mockContentCardRulesEngine);
+                        // verify rules engines synced with empty rules (code-based propositions
+                        // produce no rules)
+                        verify(mockMessagingRulesEngine, times(1))
+                                .replaceRules(rulesListCaptor.capture());
+                        assertEquals(0, rulesListCaptor.getValue().size());
+                        verify(mockContentCardRulesEngine, times(1))
+                                .replaceRules(contentCardRulesListCaptor.capture());
+                        assertEquals(0, contentCardRulesListCaptor.getValue().size());
 
                         // verify received propositions event is dispatched
                         ArgumentCaptor<Event> dispatchEventArgumentCaptor =
@@ -1556,11 +1560,13 @@ public class EdgePersonalizationResponseHandlerTests {
                         // test
                         edgePersonalizationResponseHandler.handleProcessCompletedEvent(mockEvent);
 
-                        // verify rules not replaced in in-app rules engine
-                        verify(mockMessagingRulesEngine, times(0)).replaceRules(anyList());
-
-                        // verify rules not replaced in feed rules engine
-                        verify(mockContentCardRulesEngine, times(0)).replaceRules(anyList());
+                        // verify rules engines synced with empty rules
+                        verify(mockMessagingRulesEngine, times(1))
+                                .replaceRules(rulesListCaptor.capture());
+                        assertEquals(0, rulesListCaptor.getValue().size());
+                        verify(mockContentCardRulesEngine, times(1))
+                                .replaceRules(contentCardRulesListCaptor.capture());
+                        assertEquals(0, contentCardRulesListCaptor.getValue().size());
 
                         // verify received propositions event not dispatched
                         verify(mockExtensionApi, times(0)).dispatch(any(Event.class));
@@ -1659,11 +1665,14 @@ public class EdgePersonalizationResponseHandlerTests {
                         // test
                         edgePersonalizationResponseHandler.handleProcessCompletedEvent(mockEvent);
 
-                        // verify rules not replaced in in-app rules engine
-                        verify(mockMessagingRulesEngine, times(0)).replaceRules(anyList());
-
-                        // verify rules not replaced in feed rules engine
-                        verify(mockContentCardRulesEngine, times(0)).replaceRules(anyList());
+                        // verify rules engines synced with empty rules (invalid payload produces no
+                        // parseable rules)
+                        verify(mockMessagingRulesEngine, times(1))
+                                .replaceRules(rulesListCaptor.capture());
+                        assertEquals(0, rulesListCaptor.getValue().size());
+                        verify(mockContentCardRulesEngine, times(1))
+                                .replaceRules(contentCardRulesListCaptor.capture());
+                        assertEquals(0, contentCardRulesListCaptor.getValue().size());
 
                         // verify received propositions event not dispatched
                         verify(mockExtensionApi, times(0)).dispatch(any(Event.class));

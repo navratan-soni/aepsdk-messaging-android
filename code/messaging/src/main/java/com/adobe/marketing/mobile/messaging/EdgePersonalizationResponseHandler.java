@@ -678,46 +678,41 @@ class EdgePersonalizationResponseHandler {
                 requestedSurfaces,
                 eventHistoryRulesBySurface);
 
-        // collect and update content card rules engine
-        if (surfaceRulesBySchemaType.get(SchemaType.CONTENT_CARD) != null) {
-            final List<LaunchRule> collectedContentCardRules =
-                    collectRulesFrom(contentCardRulesBySurface);
-            contentCardRulesEngine.replaceRules(collectedContentCardRules);
+        // Always sync the content card rules engine and refresh the qualified cache.
+        // processRulesForSchemaType clears contentCardRulesBySurface for requested surfaces
+        // when CONTENT_CARD is absent from the response (e.g. all campaigns removed
+        // server-side); we must still replaceRules and call removeOrReplaceContentCards in
+        // that case — not only when the key is present.
+        final List<LaunchRule> collectedContentCardRules =
+                collectRulesFrom(contentCardRulesBySurface);
+        contentCardRulesEngine.replaceRules(collectedContentCardRules);
 
-            // process a generic event to see if there are any content cards with:
-            // 1. no client-side qualification requirements, or
-            // 2. prior qualification by this device
-            final Event event =
-                    new Event.Builder(
-                                    "Seed content cards",
-                                    EventType.MESSAGING,
-                                    EventSource.REQUEST_CONTENT)
-                            .build();
-            removeOrReplaceContentCards(event, requestedSurfaces);
-        }
+        final Event contentCardSeedEvent =
+                new Event.Builder(
+                                "Seed content cards",
+                                EventType.MESSAGING,
+                                EventSource.REQUEST_CONTENT)
+                        .build();
+        removeOrReplaceContentCards(contentCardSeedEvent, requestedSurfaces);
 
-        // collect and update launch rules engine for in-app and event history
-        if (surfaceRulesBySchemaType.get(SchemaType.INAPP) != null
-                || surfaceRulesBySchemaType.get(SchemaType.EVENT_HISTORY_OPERATION) != null) {
+        // Always sync the in-app + event history rules engine, for the same reason as
+        // content cards above: processRulesForSchemaType already cleared stale entries from
+        // inAppRulesBySurface / eventHistoryRulesBySurface, and the engine must reflect that.
+        final List<LaunchRule> collectedInAppRules = collectRulesFrom(inAppRulesBySurface);
 
-            // pre-fetch the assets for in-app message if any in-app rules were returned
-            final List<LaunchRule> collectedInAppRules = collectRulesFrom(inAppRulesBySurface);
-            if (surfaceRulesBySchemaType.get(SchemaType.INAPP) != null) {
-                final List<RuleConsequence> collectedInAppConsequences = new ArrayList<>();
-                for (final LaunchRule rule : collectedInAppRules) {
-                    collectedInAppConsequences.addAll(rule.getConsequenceList());
-                }
-                cacheImageAssetsFromPayload(collectedInAppConsequences);
+        // Pre-fetch assets only when the response actually contained new in-app rules
+        if (surfaceRulesBySchemaType.get(SchemaType.INAPP) != null) {
+            final List<RuleConsequence> collectedInAppConsequences = new ArrayList<>();
+            for (final LaunchRule rule : collectedInAppRules) {
+                collectedInAppConsequences.addAll(rule.getConsequenceList());
             }
-
-            // collect rules for in-app message and event history
-            final List<LaunchRule> collectedInAppAndEventHistoryRules =
-                    new ArrayList<>(collectedInAppRules);
-            collectedInAppAndEventHistoryRules.addAll(collectRulesFrom(eventHistoryRulesBySurface));
-
-            // update rules in launch rules engine
-            launchRulesEngine.replaceRules(collectedInAppAndEventHistoryRules);
+            cacheImageAssetsFromPayload(collectedInAppConsequences);
         }
+
+        final List<LaunchRule> collectedInAppAndEventHistoryRules =
+                new ArrayList<>(collectedInAppRules);
+        collectedInAppAndEventHistoryRules.addAll(collectRulesFrom(eventHistoryRulesBySurface));
+        launchRulesEngine.replaceRules(collectedInAppAndEventHistoryRules);
     }
 
     private void processRulesForSchemaType(

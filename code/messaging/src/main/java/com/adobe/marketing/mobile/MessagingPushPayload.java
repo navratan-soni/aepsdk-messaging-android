@@ -17,6 +17,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import com.adobe.marketing.mobile.messaging.MessagingConstants;
 import com.adobe.marketing.mobile.services.Log;
@@ -119,6 +120,10 @@ public class MessagingPushPayload {
     private Map<String, String> data;
     private String messageId;
     private String inappMessageId;
+
+    // Lazy-parsed Live Update envelope (parse-once, cached).
+    private LiveUpdateEnvelope liveUpdate;
+    private boolean liveUpdateParsed;
 
     /**
      * Constructor
@@ -274,6 +279,27 @@ public class MessagingPushPayload {
 
     public Map<String, String> getData() {
         return data;
+    }
+
+    /**
+     * Parsed {@link LiveUpdateEnvelope}, or {@code null} when this push is not a Live Update —
+     * i.e. when the payload does not contain the
+     * {@link MessagingConstants.Push.PayloadKeys#LIVE_UPDATE_DATA} key, when the envelope
+     * cannot be parsed, or when it is missing the required {@code live_update_id}.
+     *
+     * <p>Parsed lazily on first access and cached for subsequent calls.
+     */
+    public @Nullable LiveUpdateEnvelope getLiveUpdate() {
+        if (liveUpdateParsed) {
+            return liveUpdate;
+        }
+        liveUpdate =
+                data == null
+                        ? null
+                        : LiveUpdateEnvelope.parse(
+                                data.get(MessagingConstants.Push.PayloadKeys.LIVE_UPDATE_DATA));
+        liveUpdateParsed = true;
+        return liveUpdate;
     }
 
     private void init(final Map<String, String> data) {

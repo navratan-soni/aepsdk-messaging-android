@@ -449,6 +449,13 @@ public final class MessagingConstants {
             public static final String ACTION_BUTTONS = "adb_act";
             public static final String INAPP_MESSAGE_ID = "adb_iam_id";
 
+            /**
+             * JSON-stringified Live Update envelope. Parsed into {@link
+             * com.adobe.marketing.mobile.LiveUpdateEnvelope} and exposed via {@code
+             * MessagingPushPayload.getLiveUpdate()}.
+             */
+            public static final String LIVE_UPDATE_DATA = "adb_live_update_data";
+
             private PayloadKeys() {}
         }
     }

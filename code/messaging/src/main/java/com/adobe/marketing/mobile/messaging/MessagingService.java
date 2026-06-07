@@ -14,10 +14,13 @@ package com.adobe.marketing.mobile.messaging;
 import android.app.Notification;
 import android.content.Context;
 import androidx.annotation.NonNull;
+import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import com.adobe.marketing.mobile.Event;
 import com.adobe.marketing.mobile.EventSource;
 import com.adobe.marketing.mobile.EventType;
+import com.adobe.marketing.mobile.LiveUpdateHandler;
+import com.adobe.marketing.mobile.Messaging;
 import com.adobe.marketing.mobile.MessagingPushPayload;
 import com.adobe.marketing.mobile.MobileCore;
 import com.adobe.marketing.mobile.services.Log;
@@ -59,6 +62,22 @@ public class MessagingService extends FirebaseMessagingService {
         }
 
         final MessagingPushPayload payload = new MessagingPushPayload(remoteMessage);
+
+        // Live Update branch — fast gate: only enter when payload carries an envelope AND a
+        // handler is registered. The handler returns boolean: true means it posted, false
+        // means "fall back to default Messaging path with the same builder I was given."
+        final LiveUpdateHandler liveUpdateHandler = Messaging.getLiveUpdateHandler();
+        if (liveUpdateHandler != null && payload.getLiveUpdate() != null) {
+            final NotificationCompat.Builder builder =
+                    MessagingPushBuilder.buildBuilder(payload, context);
+            if (liveUpdateHandler.handleLiveUpdatePush(context, builder, payload)) {
+                PushCallbackHandler.notifyReceived(payload);
+                dispatchPushDisplayedEvent(remoteMessage);
+                return true;
+            }
+            // Handler declined — fall through to default Messaging path.
+        }
+
         final Notification notification = MessagingPushBuilder.build(payload, context);
 
         // display notification
@@ -67,8 +86,11 @@ public class MessagingService extends FirebaseMessagingService {
         notificationManager.notify(remoteMessage.getMessageId().hashCode(), notification);
 
         PushCallbackHandler.notifyReceived(payload);
+        dispatchPushDisplayedEvent(remoteMessage);
+        return true;
+    }
 
-        // dispatch Push notification displayed event
+    private static void dispatchPushDisplayedEvent(final RemoteMessage remoteMessage) {
         final HashMap<String, Object> notificationData = new HashMap<>(remoteMessage.getData());
         final Event pushNotificationReceivedEvent =
                 new Event.Builder(
@@ -78,7 +100,6 @@ public class MessagingService extends FirebaseMessagingService {
                         .setEventData(notificationData)
                         .build();
         MobileCore.dispatchEvent(pushNotificationReceivedEvent);
-        return true;
     }
 
     /**

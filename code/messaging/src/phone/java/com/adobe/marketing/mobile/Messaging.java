@@ -16,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.adobe.marketing.mobile.messaging.CompletionHandler;
 import com.adobe.marketing.mobile.messaging.IamRefreshHandler;
+import com.adobe.marketing.mobile.messaging.LiveUpdateHandlerStore;
 import com.adobe.marketing.mobile.messaging.MessagingExtension;
 import com.adobe.marketing.mobile.messaging.MessagingUtils;
 import com.adobe.marketing.mobile.messaging.Proposition;
@@ -36,7 +37,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public final class Messaging {
-    private static final String EXTENSION_VERSION = "3.9.0";
+    private static final String EXTENSION_VERSION = "3.10.0";
     private static final String LOG_TAG = "Messaging";
     private static final String CLASS_NAME = "Messaging";
 
@@ -583,5 +584,26 @@ public final class Messaging {
     public static void setPushNotificationListener(
             @Nullable final PushNotificationListener listener) {
         PushCallbackHandler.setListener(listener);
+    }
+
+    /**
+     * Registers a {@link LiveUpdateHandler} to receive Live Update push payloads. Only one
+     * handler can be active at a time; setting a new handler replaces the previous one.
+     *
+     * <p>The handler is queried from {@code MessagingService.handleRemoteMessage} when an AJO
+     * push is classified as a Live Update. If no handler is registered, the push is rendered
+     * via the default Messaging path.
+     *
+     * @param handler the {@link LiveUpdateHandler} to register, or {@code null} to unregister
+     */
+    public static void setLiveUpdateHandler(@Nullable final LiveUpdateHandler handler) {
+        LiveUpdateHandlerStore.INSTANCE.setHandler(handler);
+    }
+
+    /**
+     * Returns the currently-registered {@link LiveUpdateHandler}, or {@code null} if none.
+     */
+    @Nullable public static LiveUpdateHandler getLiveUpdateHandler() {
+        return LiveUpdateHandlerStore.INSTANCE.getHandler();
     }
 }

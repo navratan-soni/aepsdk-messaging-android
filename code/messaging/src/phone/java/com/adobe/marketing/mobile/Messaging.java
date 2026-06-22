@@ -587,23 +587,24 @@ public final class Messaging {
     }
 
     /**
-     * Registers a {@link LiveUpdateHandler} to receive Live Update push payloads. Only one
+     * Registers an {@link ILiveUpdateHandler} to receive Live Update push payloads. Only one
      * handler can be active at a time; setting a new handler replaces the previous one.
      *
      * <p>The handler is queried from {@code MessagingService.handleRemoteMessage} when an AJO
-     * push is classified as a Live Update. If no handler is registered, the push is rendered
-     * via the default Messaging path.
+     * push carries the {@code adb_liveupdate_data} key. If no handler is registered, Live
+     * Update pushes are dropped with a warning log — Messaging cannot meaningfully render a
+     * payload whose content lives entirely inside {@code adb_liveupdate_data}.
      *
-     * @param handler the {@link LiveUpdateHandler} to register, or {@code null} to unregister
+     * @param handler the {@link ILiveUpdateHandler} to register, or {@code null} to unregister
      */
-    public static void setLiveUpdateHandler(@Nullable final LiveUpdateHandler handler) {
+    public static void setLiveUpdateHandler(@Nullable final ILiveUpdateHandler handler) {
         LiveUpdateHandlerStore.INSTANCE.setHandler(handler);
     }
 
     /**
-     * Returns the currently-registered {@link LiveUpdateHandler}, or {@code null} if none.
+     * Returns the currently-registered {@link ILiveUpdateHandler}, or {@code null} if none.
      */
-    @Nullable public static LiveUpdateHandler getLiveUpdateHandler() {
+    @Nullable public static ILiveUpdateHandler getLiveUpdateHandler() {
         return LiveUpdateHandlerStore.INSTANCE.getHandler();
     }
 }

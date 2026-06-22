@@ -450,11 +450,12 @@ public final class MessagingConstants {
             public static final String INAPP_MESSAGE_ID = "adb_iam_id";
 
             /**
-             * JSON-stringified Live Update envelope. Parsed into {@link
-             * com.adobe.marketing.mobile.LiveUpdateEnvelope} and exposed via {@code
-             * MessagingPushPayload.getLiveUpdate()}.
+             * JSON-stringified Live Update envelope. Detection key only — Messaging never
+             * reads inside it. When present and an {@link
+             * com.adobe.marketing.mobile.ILiveUpdateHandler} is registered, the raw
+             * {@link com.google.firebase.messaging.RemoteMessage} is handed to the handler.
              */
-            public static final String LIVE_UPDATE_DATA = "adb_live_update_data";
+            public static final String LIVE_UPDATE_DATA = "adb_liveupdate_data";
 
             private PayloadKeys() {}
         }

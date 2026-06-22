@@ -11,21 +11,20 @@
 
 package com.adobe.marketing.mobile.messaging
 
-import com.adobe.marketing.mobile.LiveUpdateHandler
+import com.adobe.marketing.mobile.ILiveUpdateHandler
 
 /**
- * Holds the currently-registered [LiveUpdateHandler]. Mirrors the pattern used by
- * `AppResourceStore` in core. Backed by a `@Volatile` field — no persistence needed; the
- * Live Updates SDK re-registers on every app start.
+ * Holds the currently-registered [ILiveUpdateHandler]. Backed by a `@Volatile` field —
+ * no persistence needed; the Live Updates SDK re-registers on every app start.
  */
 internal object LiveUpdateHandlerStore {
 
     @Volatile
-    private var handler: LiveUpdateHandler? = null
+    private var handler: ILiveUpdateHandler? = null
 
-    fun setHandler(h: LiveUpdateHandler?) {
+    fun setHandler(h: ILiveUpdateHandler?) {
         handler = h
     }
 
-    fun getHandler(): LiveUpdateHandler? = handler
+    fun getHandler(): ILiveUpdateHandler? = handler
 }

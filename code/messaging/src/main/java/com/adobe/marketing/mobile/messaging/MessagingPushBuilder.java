@@ -55,18 +55,13 @@ class MessagingPushBuilder {
     private static final String DEFAULT_CHANNEL_NAME = "General Notifications";
 
     /**
-     * Builds a fully-populated {@link NotificationCompat.Builder} for the received payload
-     * without calling {@link NotificationCompat.Builder#build()}. Used by the Live Updates
-     * SDK, which needs to add API-36-specific bits ({@code setStyle(ProgressStyle)},
-     * {@code setRequestPromotedOngoing}) before posting.
+     * Builds a notification for the received payload.
      *
      * @param payload {@link MessagingPushPayload} the payload received from the push notification
      * @param context the application {@link Context}
-     * @return the {@link NotificationCompat.Builder} with title, body, small icon, click and
-     *     delete intents, channel, action buttons, sound, and visibility applied
+     * @return the notification
      */
-    @NonNull public static NotificationCompat.Builder buildBuilder(
-            final MessagingPushPayload payload, final Context context) {
+    @NonNull static Notification build(final MessagingPushPayload payload, final Context context) {
         final String channelId = createChannelAndGetChannelID(payload, context);
 
         final NotificationCompat.Builder builder =
@@ -87,20 +82,7 @@ class MessagingPushBuilder {
         setNotificationClickAction(builder, payload, context);
         setNotificationDeleteAction(builder, payload, context);
 
-        return builder;
-    }
-
-    /**
-     * Builds a notification for the received payload. Equivalent to {@link
-     * #buildBuilder(MessagingPushPayload, Context)} followed by image / GIF resolution and
-     * {@link NotificationCompat.Builder#build()}.
-     *
-     * @param payload {@link MessagingPushPayload} the payload received from the push notification
-     * @param context the application {@link Context}
-     * @return the notification
-     */
-    @NonNull static Notification build(final MessagingPushPayload payload, final Context context) {
-        return buildNotification(buildBuilder(payload, context), payload);
+        return buildNotification(builder, payload);
     }
 
     /**

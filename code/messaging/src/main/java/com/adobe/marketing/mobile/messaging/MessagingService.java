@@ -16,6 +16,7 @@ import android.app.Notification;
 import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationManagerCompat;
+import com.adobe.marketing.mobile.ILiveUpdateHandler;
 import com.adobe.marketing.mobile.Messaging;
 import com.adobe.marketing.mobile.MessagingPushPayload;
 import com.adobe.marketing.mobile.MobileCore;
@@ -75,6 +76,30 @@ public class MessagingService extends FirebaseMessagingService {
             return false;
         }
 
+        // Live Update fork — early gate. If a handler is registered, hand off the raw
+        // RemoteMessage; the handler owns parsing, building, and posting end-to-end.
+        // If no handler is registered, drop with a warning — Messaging cannot meaningfully
+        // render a Live Update payload (its content lives inside adb_liveupdate_data which
+        // is intentionally opaque to Messaging).
+        if (remoteMessage
+                .getData()
+                .containsKey(MessagingConstants.Push.PayloadKeys.LIVE_UPDATE_DATA)) {
+            final ILiveUpdateHandler handler = Messaging.getLiveUpdateHandler();
+            if (handler == null) {
+                Log.warning(
+                        MessagingPushConstants.LOG_TAG,
+                        SELF_TAG,
+                        "Received a Live Update push but no ILiveUpdateHandler is registered."
+                                + " Dropping. Register a handler via"
+                                + " Messaging.setLiveUpdateHandler(...).");
+                return true;
+            }
+            handler.handleLiveUpdatePush(context, remoteMessage);
+            return true;
+        }
+
+        // Standard push path — UNCHANGED from pre-Live-Update state. Reads only outer adb_*
+        // keys; never peeks inside adb_liveupdate_data.
         // Build and display the notification synchronously while the FCM wakelock is active.
         final MessagingPushPayload payload = new MessagingPushPayload(remoteMessage);
         final Notification notification = MessagingPushBuilder.build(payload, context);

@@ -17,12 +17,10 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import com.adobe.marketing.mobile.messaging.MessagingConstants;
 import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.util.StringUtils;
-import com.google.firebase.Firebase;
 import com.google.firebase.messaging.RemoteMessage;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -287,8 +285,6 @@ public class MessagingPushPayload {
                     "Payload extraction failed because data provided is null");
             return;
         }
-
-
         this.title = data.get(MessagingConstants.Push.PayloadKeys.TITLE);
         this.body = data.get(MessagingConstants.Push.PayloadKeys.BODY);
         this.sound = data.get(MessagingConstants.Push.PayloadKeys.SOUND);

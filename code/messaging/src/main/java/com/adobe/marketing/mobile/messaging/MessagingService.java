@@ -48,7 +48,6 @@ public class MessagingService extends FirebaseMessagingService {
     public void onMessageReceived(final @NonNull RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
         handleRemoteMessage(this, remoteMessage);
-        FirebaseMessaging.getInstance().subscribeToTopic()
     }
 
     public static boolean handleRemoteMessage(

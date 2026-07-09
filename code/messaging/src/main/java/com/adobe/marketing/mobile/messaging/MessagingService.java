@@ -92,7 +92,7 @@ public class MessagingService extends FirebaseMessagingService {
                         "Received a Live Update push but no ILiveUpdateHandler is registered."
                                 + " Dropping. Register a handler via"
                                 + " Messaging.setLiveUpdateHandler(...).");
-                return true;
+                return false;
             }
             handler.handleLiveUpdatePush(context, remoteMessage);
             return true;

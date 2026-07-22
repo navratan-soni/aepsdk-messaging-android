@@ -79,8 +79,7 @@ public class MessagingService extends FirebaseMessagingService {
         }
 
         // Build and display the notification synchronously while the FCM wakelock is active.
-        final MessagingPushPayload payload = new MessagingPushPayload(remoteMessage);
-        final Notification notification = MessagingPushBuilder.build(payload, context);
+        final Notification notification = MessagingPushBuilder.build(remoteMessage, context);
         if (notification == null) {
             // notification could not be constructed; the push message is ignored
             return false;

@@ -30,8 +30,7 @@ import androidx.core.app.NotificationCompat;
 import com.adobe.marketing.mobile.Messaging;
 import com.adobe.marketing.mobile.MessagingPushPayload;
 import com.adobe.marketing.mobile.MobileCore;
-import com.adobe.marketing.mobile.notificationbuilder.NotificationBuilder;
-import com.adobe.marketing.mobile.notificationbuilder.NotificationConstructionFailedException;
+import com.adobe.marketing.mobile.plugin.IUiTemplatePlugin;
 import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.services.caching.CacheResult;
 import com.adobe.marketing.mobile.util.StringUtils;
@@ -76,20 +75,35 @@ class MessagingPushBuilder {
                 remoteMessage.getData().get(MessagingConstants.Push.PayloadKeys.TEMPLATE_TYPE);
 
         if (!StringUtils.isNullOrEmpty(templateType)) {
-            // AJO template payload -> delegate rendering to the UI notificationbuilder library
-            try {
-                return NotificationBuilder.constructNotificationBuilder(
-                                remoteMessage.getData(),
-                                MessagingPushTrackerActivity.class,
-                                NotificationInteractionReceiver.class)
-                        .build();
-            } catch (final NotificationConstructionFailedException | IllegalArgumentException e) {
+            // AJO template payload -> delegate rendering to the registered UI template plugin
+            // (aepsdk-ui-android's NotificationBuilderPlugin), resolved from Core. Messaging keeps
+            // ownership of posting and tracking, so the UI add-on needs no dependency on Messaging.
+            final IUiTemplatePlugin uiTemplatePlugin = MobileCore.getPlugin(IUiTemplatePlugin.class);
+            if (uiTemplatePlugin == null) {
                 Log.warning(
                         MessagingPushConstants.LOG_TAG,
                         SELF_TAG,
-                        "Failed to build templated notification, ignoring the push message. Error:"
-                                + " %s",
-                        e.getLocalizedMessage());
+                        "Received a push template ('%s') but no IUiTemplatePlugin is registered."
+                                + " Add the aepsdk-ui-android plugin and register it via"
+                                + " MobileCore.addPlugins(...). Falling back to a basic notification.",
+                        templateType);
+                // fall through to the basic push flow below
+            } else {
+                final Notification templateNotification =
+                        uiTemplatePlugin.buildPushTemplateNotification(
+                                context,
+                                remoteMessage.getData(),
+                                MessagingPushTrackerActivity.class,
+                                NotificationInteractionReceiver.class);
+                if (templateNotification != null) {
+                    return templateNotification;
+                }
+                Log.warning(
+                        MessagingPushConstants.LOG_TAG,
+                        SELF_TAG,
+                        "IUiTemplatePlugin failed to build the '%s' template; ignoring the push"
+                                + " message.",
+                        templateType);
                 return null;
             }
         }

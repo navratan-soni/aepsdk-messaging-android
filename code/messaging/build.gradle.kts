@@ -60,9 +60,10 @@ aepLibrary {
 
 dependencies {
     implementation("com.adobe.marketing.mobile:core:$mavenCoreVersion")
-    // UI notification builder library used to render AJO templated push notifications.
-    // TODO: bump this version once aepsdk-ui-android releases AJO template support.
-    implementation("com.adobe.marketing.mobile:notificationbuilder:3.0.3")
+    // Push-template rendering is delegated to the registered IUiTemplatePlugin (resolved from Core),
+    // so Messaging no longer depends on aepsdk-ui-android / notificationbuilder directly. Apps that
+    // want AJO templates add aepsdk-ui-android and register NotificationBuilderPlugin via
+    // MobileCore.addPlugins(...).
     // dependencies provided by aep-library:
     // COMPOSE_RUNTIME, COMPOSE_MATERIAL, ANDROIDX_ACTIVITY_COMPOSE, COMPOSE_UI_TOOLING
     implementation("androidx.compose.ui:ui-tooling-preview:${BuildConstants.Versions.COMPOSE}")
